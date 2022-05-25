@@ -1,0 +1,28 @@
+body{
+    text-align: center;
+}
+
+table{
+    margin: auto;
+}
+
+.board td {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    transition: 0.5s;
+    border: 1px solid rgb(99, 99, 99);
+    text-size-adjust: 20rem;
+}
+
+.cell{
+    font-size:xx-large    
+}
+
+.shown{
+    background-color: rgb(171, 127, 211);
+}
+
+.hidden{
+    background-color: aquamarine;
+}
