@@ -74,8 +74,8 @@ function buildBoard() {
 
   //random mines
   for (var i = 0; i < gLevel.mines; i++) {
-    var iRand = rand(0, 4);
-    var jRand = rand(0, 4);
+    var iRand = rand(0, gLevel.size);
+    var jRand = rand(0, gLevel.size);
     board[iRand][jRand].isMine = true;
   }
 
