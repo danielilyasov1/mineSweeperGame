@@ -1,5 +1,6 @@
 body{
     text-align: center;
+    background-color: palevioletred;
 }
 
 table{
@@ -7,8 +8,8 @@ table{
 }
 
 .board td {
-    width: 60px;
-    height: 60px;
+    width: 40px;
+    height: 40px;
     text-align: center;
     transition: 0.5s;
     border: 1px solid rgb(99, 99, 99);
@@ -20,9 +21,38 @@ table{
 }
 
 .shown{
-    background-color: rgb(171, 127, 211);
+    background-color: darkgray;
 }
 
 .hidden{
-    background-color: aquamarine;
+    background-color: lightgray;
+}
+
+.footer {
+    color:black;
+    position: relative;
+    margin-top: 2%;
+
+}
+
+button{
+    margin-left: 20px;
+    margin-right: 20px;
+    width: 60px;
+    height: 60px;
+    font-size: xx-large;
+    background-color: lightgray;
+    border-color: darkgrey;
+    transition: 0.5s;
+}
+
+.level{
+    width: auto;
+    height: auto;
+    font-size: medium;
+    font-family: Arial, Helvetica, sans-serif;
+    margin-left: 10px;
+    margin-right: 10px;
+    border-color: darkgrey;
+    transition: 0.5s;
 }

@@ -1,7 +1,7 @@
 function startTimer() {
   var startTime = Date.now();
-  ginterval = setInterval(() => {
-    gGame.secsPassed++
+  gTimeInterval = setInterval(() => {
+    gGame.secsPassed++;
     var elTime = document.querySelector(".time");
     elTime.innerText = ((Date.now() - startTime) / 1000).toFixed(1);
   }, 24);
@@ -12,28 +12,46 @@ function createBoard(size) {
   for (var i = 0; i < size; i++) {
     board[i] = [];
     for (var j = 0; j < size; j++) {
-      board[i].push("");
+      board[i][j] = {
+        minesAroundCount: 0,
+        isShown: false,
+        isMine: false,
+        isMarked: false,
+      };
     }
-    board.push(board[i]);
   }
   return board;
 }
 
-function NegsCount(cellI, cellJ, gBoard) {
-  //need fix last line in board ?????
+function NegsCount(cellI, cellJ, board) {
   var mineNegsCount = 0;
 
-  for (var i = cellI - 1; i <= cellI + 1; i++) {
-    if (i < 0 || i >= gLevel.size) continue;
+  if (isCellMine(cellI, cellJ - 1, board)) mineNegsCount++;
+  if (isCellMine(cellI, cellJ + 1, board)) mineNegsCount++;
+  if (isCellMine(cellI + 1, cellJ + 0, board)) mineNegsCount++;
+  if (isCellMine(cellI + 1, cellJ - 1, board)) mineNegsCount++;
+  if (isCellMine(cellI + 1, cellJ + 1, board)) mineNegsCount++;
+  if (isCellMine(cellI - 1, cellJ + 0, board)) mineNegsCount++;
+  if (isCellMine(cellI - 1, cellJ - 1, board)) mineNegsCount++;
+  if (isCellMine(cellI - 1, cellJ + 1, board)) mineNegsCount++;
 
-    for (var j = cellJ - 1; j <= cellJ + 1; j++) {
-      if (j < 0 || j >= gLevel.size) continue;
-      if (i === cellI && j === cellJ) continue;
-      //if ((i !== cellI || j !== cellJ) && gBoard[i][j].isMine) mineNegsCount++;
-      //console.log("mineNegsCount",i,j, mineNegsCount,gBoard[i][j].isMine);
-      if (gBoard[i][j].isMine) mineNegsCount++;
-    }
+  if (mineNegsCount === 0) {
+    mineNegsCount = EMPTY;
   }
-  //console.log("hi");
   return mineNegsCount;
+}
+
+function isOnField(i, j) {
+  return i >= 0 && i < gLevel.size && j >= 0 && j < gLevel.size;
+}
+
+function isCellMine(i, j, board) {
+  if (!isOnField(i, j)) return;
+  return board[i][j].isMine;
+}
+
+function rand(min, max){
+    min = Math.ceil(min)
+    max = Math.floor(max)
+    return Math.floor(Math.random() * (max - min) + min)
 }
