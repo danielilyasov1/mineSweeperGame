@@ -1,3 +1,14 @@
+div{
+    background-color: rgb(213, 161, 178);
+    margin: auto;
+    padding: auto;
+    width: 630px;
+    height: auto;
+    border: 20px;
+    border-color: beige;
+    border-radius: 20%;
+}
+
 body{
     text-align: center;
     background-color: palevioletred;
@@ -55,4 +66,7 @@ button{
     margin-right: 10px;
     border-color: darkgrey;
     transition: 0.5s;
+}
+.lives-count span{
+    margin-left:30px;
 }

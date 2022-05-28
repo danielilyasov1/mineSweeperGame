@@ -1,6 +1,11 @@
 "use strict";
 
 document.addEventListener("contextmenu", (event) => event.preventDefault());
+var elTime = document.querySelector(".time");
+var elFlag = document.querySelector(".flag-count");
+var elEmoji = document.querySelector(".emoji");
+var elLive = document.querySelector(".lives-count");
+var elMine = document.querySelector(".mines-count");
 
 const EMPTY = "";
 const MINE = "🧨";
@@ -31,36 +36,47 @@ var gGame = {
 function level1() {
   gLevel.size = 4;
   gLevel.mines = 2;
-  init();
+  newGame();
 }
+
 function level2() {
   gLevel.size = 8;
   gLevel.mines = 12;
-  init();
+  newGame();
 }
+
 function level3() {
   gLevel.size = 12;
   gLevel.mines = 30;
-  init();
+  newGame();
 }
 
 function init() {
   gBoard = buildBoard();
   gGame.isOn = true;
-  renderBoard(gBoard);
-  document.querySelector(".mines-count").innerText = gLevel.mines;
-  document.querySelector(".flag-count").innerText = gGame.flagCount;
-  var elTime = document.querySelector(".time");
+
+  elMine.innerText = gLevel.mines;
+  elFlag.innerText = gGame.flagCount;
+  elLive.innerText = gGame.lives;
   elTime.innerText = gGame.secsPassed;
-  document.querySelector(".emoji").innerText = EMOJI;
+  elEmoji.innerText = EMOJI;
+  
+  renderBoard(gBoard);
 }
+
 function newGame() {
   clearInterval(gTimeInterval);
+  elEmoji.style.background = "lightgray";
+
   gBoomCount = 0;
   gGame.secsPassed = 0;
   gGame.markedCount = 0;
   gGame.flagCount = 0;
   gGame.shownCount = 0;
+  gGame.lives = 3;
+
+  
+
   init();
 }
 
@@ -85,20 +101,25 @@ function buildBoard() {
 
 function renderBoard() {
   var strHTML = "";
+
   for (var i = 0; i < gLevel.size; i++) {
     strHTML += "<tr>\n";
+
     for (var j = 0; j < gLevel.size; j++) {
       var currCell = gBoard[i][j];
 
       var onBoard = currCell.isMine ? MINE : currCell.minesAroundCount;
       var classList = currCell.isShown ? "shown" : "hidden";
-      strHTML += `<td id="cell-${i}-${j}" class="cell ${classList}" 
+
+      strHTML += `<td id="cell-${i}-${j}" class="cell ${classList}"
       oncontextmenu="cellMarked(this,${i},${j},event)"
       onClick="cellClicked(this,${i},${j},event)" >
-      ${currCell.isShown ? onBoard : EMPTY}</td>`;
+      ${currCell.isShown ? onBoard : currCell.isMarked ? FLAG : EMPTY}</td>`;
     }
+
     strHTML += "</tr>";
   }
+
   var elTable = document.querySelector(".board");
   elTable.innerHTML = strHTML;
 }
@@ -113,63 +134,107 @@ function setMinesNegsCount(board) {
   }
 }
 
-function expandShown(elCell, i, j) {
-  if (
-    !isOnField(i, j) ||
-    gBoard[i][j].minesAroundCount !== 0 ||
-    gBoard[i][j].isShown
-  )
-    return;
+function checkIsExpendable(i, j) {
+  if (!isOnField(i, j) || gBoard[i][j].isShown) return;
 
-  gBoard[i][j].isShown = true;
+  if (gBoard[i][j].isMarked) {
+
+    gGame.flagCount--;
+    gGame.markedCount--;
+    elFlag.innerText = gGame.markedCount;
+
+  }
+
+  gGame.shownCount++;
+  expandShown(i, j);
+}
+
+function expandShown(i, j) {
+
+  var cell = gBoard[i][j];
+
+  if (cell.isMine) return;
+  cell.isShown = true;
+
   renderBoard();
+
+  if (cell.minesAroundCount === EMPTY) {
+
+    checkIsExpendable(i, j - 1);
+    checkIsExpendable(i, j + 1);
+    checkIsExpendable(i + 1, j + 0);
+    checkIsExpendable(i + 1, j - 1);
+    checkIsExpendable(i + 1, j + 1);
+    checkIsExpendable(i - 1, j + 0);
+    checkIsExpendable(i - 1, j - 1);
+    checkIsExpendable(i - 1, j + 1);
+  }
 }
 
 function cellClicked(elCell, i, j) {
+  var cell = gBoard[i][j];
+
+  if (!gGame.isOn || cell.isShown) return;
+
   if (gGame.secsPassed === 0) {
     startTimer();
   }
 
-  gBoard[i][j].isShown = true;
+  if (cell.isMarked) {
+    console.log("gi");
+    return;
 
-  if (elCell.minesAroundCount === 0) {
-    expandShown(elCell, i, j);
-  }
-  renderBoard();
-
-  if (gBoard[i][j].isMine) {
-    console.log("boom");
-    gBoomCount++;
   } else {
-    elCell.isShown = true;
-    gGame.shownCount++;
+    cell.isShown = true;
+
+    if (cell.minesAroundCount === EMPTY) {
+      expandShown(i, j);
+    }
+
+    if (cell.isMine) {
+      // boom
+      gBoomCount++;
+      gGame.lives--;
+      elLive.innerText = gGame.lives;
+   
+    } else {
+      cell.isShown = true;
+      gGame.shownCount++;
+    }
   }
+
+  renderBoard();
   checkGameOver();
 }
 
 function cellMarked(elCell, i, j) {
-  if (gGame.secsPassed === 0) startTimer();
-
   var cell = gBoard[i][j];
+
+  if (gGame.secsPassed === 0) startTimer();
 
   if (!gGame.isOn) return;
 
   if (!cell.isShown) {
+  
     if (!cell.isMarked) {
+  
       if (gGame.markedCount === gLevel.mines) return;
 
       elCell.innerText = FLAG;
       gGame.markedCount++;
       cell.isMarked = true;
+  
     } else {
       elCell.innerText = EMPTY;
       gGame.markedCount--;
       cell.isMarked = false;
     }
 
+    elFlag.innerText = gGame.markedCount;
+
     if (cell.isMine && cell.isMarked) {
       gGame.flagCount++;
-      document.querySelector(".flag-count").innerText = gGame.flagCount;
+      elCell.innerText = FLAG;
     }
   }
 
@@ -177,24 +242,24 @@ function cellMarked(elCell, i, j) {
 }
 
 function checkGameOver() {
-  if (gBoomCount > 0) {
-    ///=== gLevel.mines
-
-    document.querySelector(".emoji").innerText = LOSE;
-    document.querySelector(".emoji").style.background = "darkgray";
-    console.log("game over");
+ 
+  if (gGame.lives === 0) {
+    //game over
+    elEmoji.innerText = LOSE;
+    elEmoji.style.background = "darkgray";
 
     gameOver();
     return;
   }
 
-  if (
-    gGame.flagCount == gLevel.mines &&
-    gGame.shownCount === gLevel.size ** 2 - gLevel.mines
-  ) {
-    console.log("gret");
-    document.querySelector(".emoji").innerText = WIN;
-    document.querySelector(".emoji").style.background = "darkgray";
+  if ((gGame.flagCount === gLevel.mines &&
+      gGame.shownCount === gLevel.size ** 2 - gLevel.mines) ||
+      (gGame.shownCount === gLevel.size ** 2 - gLevel.mines &&
+      gBoomCount === gLevel.mines &&
+      gGame.lives !== 0)) {
+    //win
+    elEmoji.innerText = WIN;
+    elEmoji.style.background = "darkgray";
     gameOver();
     return;
   }
